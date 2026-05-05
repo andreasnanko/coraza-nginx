@@ -197,7 +197,7 @@ ngx_http_coraza_rewrite_handler(ngx_http_request_t *r)
             vv = ngx_http_get_variable(r, &var_name, key);
             if (vv && !vv->not_found && vv->len > 0) {
                 coraza_add_request_header(ctx->coraza_transaction,
-                    "X-Waf-Zone-Id", 14,
+                    "X-Waf-Zone-Id", 13,
                     (char *)vv->data, (int)vv->len);
             }
         }
