@@ -184,9 +184,16 @@ ngx_http_coraza_rewrite_handler(ngx_http_request_t *r)
          * match on values set by set_by_lua_block (which runs before
          * phase handlers). Currently injects $waf_zone_id. */
         {
-            ngx_str_t var_name = ngx_string("waf_zone_id");
-            ngx_uint_t key = ngx_hash_key(var_name.data, var_name.len);
+            u_char lowcase[11];
+            ngx_str_t var_name;
+            ngx_uint_t key;
             ngx_http_variable_value_t *vv;
+
+            var_name.len = 11;
+            var_name.data = lowcase;
+            ngx_memcpy(lowcase, "waf_zone_id", 11);
+            key = ngx_hash_strlow(lowcase, lowcase, 11);
+
             vv = ngx_http_get_variable(r, &var_name, key);
             if (vv && !vv->not_found && vv->len > 0) {
                 coraza_add_request_header(ctx->coraza_transaction,
