@@ -351,19 +351,16 @@ ngx_http_coraza_init(ngx_conf_t *cf)
 		dd("We are not sure how this returns, NGINX doesn't seem to think it will ever be null");
 		return NGX_ERROR;
 	}
-	/* Preaccess phase: process connection, headers, then request body.
-	 * Runs AFTER rewrite_by_lua_block so Lua-set headers (X-Waf-Ctl,
-	 * X-Waf-Exclude-Tags) are visible to phase 1 rules.
-	 * The rewrite handler (connection+headers) is pushed first so it
-	 * runs before the body handler in the preaccess array. */
-	h_rewrite = ngx_array_push(&cmcf->phases[NGX_HTTP_PREACCESS_PHASE].handlers);
+	/* Rewrite phase: process connection info and request headers. */
+	h_rewrite = ngx_array_push(&cmcf->phases[NGX_HTTP_REWRITE_PHASE].handlers);
 	if (h_rewrite == NULL)
 	{
-		dd("Not able to create a new NGX_HTTP_PREACCESS_PHASE handle for rewrite");
+		dd("Not able to create a new NGX_HTTP_REWRITE_PHASE handle");
 		return NGX_ERROR;
 	}
 	*h_rewrite = ngx_http_coraza_rewrite_handler;
 
+	/* Preaccess phase: process request body */
 	h_preaccess = ngx_array_push(&cmcf->phases[NGX_HTTP_PREACCESS_PHASE].handlers);
 	if (h_preaccess == NULL)
 	{
