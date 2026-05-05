@@ -153,4 +153,8 @@ ngx_int_t ngx_http_coraza_rewrite_handler(ngx_http_request_t *r);
 /* ngx_http_coraza_utils.c */
 ngx_int_t ngx_str_to_char(ngx_str_t a, char **str, ngx_pool_t *p);
 
+/* ngx_http_coraza_ffi.c */
+coraza_waf_t ngx_http_coraza_ffi_get_main_waf(void);
+coraza_waf_t ngx_http_coraza_ffi_swap_main_waf(coraza_waf_t new_waf);
+
 #endif /* _ngx_http_coraza_COMMON_H_INCLUDED_ */
