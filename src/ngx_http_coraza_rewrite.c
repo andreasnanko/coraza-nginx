@@ -180,10 +180,20 @@ ngx_http_coraza_rewrite_handler(ngx_http_request_t *r)
                                       (int)data[i].value.len);
         }
 
-        /**
-         * Since Coraza already knew about all headers, i guess it is safe
-         * to process this information.
-         */
+        /* Inject nginx variables as synthetic headers so SecRules can
+         * match on values set by set_by_lua_block (which runs before
+         * phase handlers). Currently injects $waf_zone_id. */
+        {
+            ngx_str_t var_name = ngx_string("waf_zone_id");
+            ngx_uint_t key = ngx_hash_key(var_name.data, var_name.len);
+            ngx_http_variable_value_t *vv;
+            vv = ngx_http_get_variable(r, &var_name, key);
+            if (vv && !vv->not_found && vv->len > 0) {
+                coraza_add_request_header(ctx->coraza_transaction,
+                    "X-Waf-Zone-Id", 14,
+                    (char *)vv->data, (int)vv->len);
+            }
+        }
 
         coraza_process_request_headers(ctx->coraza_transaction);
         dd("Processing intervention with the request headers information filled in");
