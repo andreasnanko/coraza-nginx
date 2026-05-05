@@ -2,9 +2,9 @@
  * Coraza connector for nginx - LuaJIT FFI interface
  *
  * Exposes the WAF handle for runtime rule reloading from Lua.
- * The swap function atomically replaces the active WAF in the
- * main conf and all location confs, returning the old handle
- * so the caller can free it after in-flight transactions drain.
+ * The swap function replaces the active WAF in the main conf
+ * and all location confs, returning the old main handle so the
+ * caller can free it after in-flight transactions drain.
  */
 
 #include "ngx_http_coraza_common.h"
@@ -42,9 +42,7 @@ ngx_http_coraza_ffi_swap_main_waf(coraza_waf_t new_waf)
 
     loc_confs = mmcf->loc_confs->elts;
     for (i = 0; i < mmcf->loc_confs->nelts; i++) {
-        if (loc_confs[i]->waf == old_waf || loc_confs[i]->waf == 0) {
-            loc_confs[i]->waf = new_waf;
-        }
+        loc_confs[i]->waf = new_waf;
     }
 
     ngx_log_error(NGX_LOG_NOTICE, ngx_cycle->log, 0,
