@@ -33,6 +33,25 @@ ngx_http_coraza_rewrite_handler(ngx_http_request_t *r)
         return NGX_DECLINED;
     }
 
+    /* Check $waf_bypass variable (set by set_by_lua_block from allowlist).
+     * If set to "1", skip all WAF processing for this request. */
+    {
+        u_char lowcase[10];
+        ngx_str_t var_name;
+        ngx_uint_t key;
+        ngx_http_variable_value_t *vv;
+
+        var_name.len = 10;
+        var_name.data = lowcase;
+        ngx_memcpy(lowcase, "waf_bypass", 10);
+        key = ngx_hash_strlow(lowcase, lowcase, 10);
+
+        vv = ngx_http_get_variable(r, &var_name, key);
+        if (vv && !vv->not_found && vv->len == 1 && vv->data[0] == '1') {
+            return NGX_DECLINED;
+        }
+    }
+
     dd("catching a new _rewrite_ phase handler");
 
     ctx = ngx_http_get_module_ctx(r, ngx_http_coraza_module);
